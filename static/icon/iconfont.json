@@ -1,0 +1,121 @@
+{
+  "id": "3588540",
+  "name": "live-app",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "159969",
+      "name": "more",
+      "font_class": "gengduo",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "397736",
+      "name": "分享",
+      "font_class": "fenxiang",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "658053",
+      "name": "相机",
+      "font_class": "xiangji",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "2674474",
+      "name": "播放",
+      "font_class": "bofang",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "3092322",
+      "name": "退出",
+      "font_class": "tuichu",
+      "unicode": "e792",
+      "unicode_decimal": 59282
+    },
+    {
+      "icon_id": "3405305",
+      "name": "正在直播",
+      "font_class": "zhengzaizhibo",
+      "unicode": "e6e2",
+      "unicode_decimal": 59106
+    },
+    {
+      "icon_id": "4510299",
+      "name": "语音关闭",
+      "font_class": "yuyinguanbi",
+      "unicode": "e903",
+      "unicode_decimal": 59651
+    },
+    {
+      "icon_id": "4933210",
+      "name": "金币",
+      "font_class": "jinbi",
+      "unicode": "e6ee",
+      "unicode_decimal": 59118
+    },
+    {
+      "icon_id": "5387522",
+      "name": "关闭",
+      "font_class": "guanbi",
+      "unicode": "eaf2",
+      "unicode_decimal": 60146
+    },
+    {
+      "icon_id": "5652552",
+      "name": "清晰度",
+      "font_class": "qingxidu",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "6689997",
+      "name": "美白",
+      "font_class": "meibai",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "6996234",
+      "name": "我的",
+      "font_class": "wode",
+      "unicode": "e712",
+      "unicode_decimal": 59154
+    },
+    {
+      "icon_id": "7532887",
+      "name": "暂停",
+      "font_class": "zanting",
+      "unicode": "e667",
+      "unicode_decimal": 58983
+    },
+    {
+      "icon_id": "12670569",
+      "name": "礼物",
+      "font_class": "liwu",
+      "unicode": "e67c",
+      "unicode_decimal": 59004
+    },
+    {
+      "icon_id": "12750410",
+      "name": "美颜",
+      "font_class": "meiyan",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "16198686",
+      "name": "星球",
+      "font_class": "xingqiu",
+      "unicode": "e65c",
+      "unicode_decimal": 58972
+    }
+  ]
+}
