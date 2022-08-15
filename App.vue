@@ -8,6 +8,10 @@
 				'fontFamily': "iconfont",
 				'src': "url('~@/static/icon/iconfnt.ttf')"
 			});
+			// 监听底部中间按钮点击
+			uni.onTabBarMidButtonTap(()=>{
+				console.log('111')
+			})
 		},
 		onShow: function() {
 			console.log('App Show')
