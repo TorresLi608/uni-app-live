@@ -1,0 +1,361 @@
+<template>
+	<view class="live-page">
+		<!-- http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8 -->
+		<!-- http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4 -->
+		<video class="flex-1" src="http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" autoplay controls="false"></video>
+		<!-- 顶部 -->
+		<view class="live-top fixed-top" :style="{top:statusBarHeight+'px'}">
+			<!-- 个人信息 -->
+			<view class="live-top-info px-2 flex justify-between align-center">
+				<view class="info-left rounded-circle">
+					<view class="p">
+						<image class="info-avtar rounded-circle" src="/static/gift/5.png"></image>
+					</view>
+					<view class="flex-1">
+						<text class="text-white font">昵称</text>
+						<text class="text-white font-sm">100</text>
+					</view>
+					<view class="info-btn rounded-circle bg-danger">
+						<text class="text-white">+</text>
+					</view>
+				</view>
+				<view class="info-right rounded-circle bg-info">
+					<scroll-view scroll-x="true" class="flex-1 flex">
+						<view class="p" v-for="item in 10" :key="item">
+							<image class="info-avtar rounded-circle" src="/static/gift/5.png"></image>
+						</view>
+					</scroll-view>
+					<view class="info-btn rounded-circle bg-danger">
+						<!-- <text class="text-white font">昵称</text> -->
+						<text class="text-white font-sm">10000</text>
+					</view>
+				</view>
+			</view>
+			<!-- 金币 -->
+			<view class="live-top-jold px-2 my-2">
+				<view class="info-left rounded-circle">
+					<view class="p">
+						<text class="text-warning">金币</text>
+					</view>
+					<view class="flex-1">
+						<text class="text-white font">110</text>
+					</view>
+				</view>
+			</view>
+			<!-- 礼物 -->
+			<view class="live-top-gift">
+				<live-gft ref="liveGftRef" />
+			</view>
+		</view>
+		<!-- 弹幕 -->
+		<LiveDanmu ref="liveDanmuRef" />
+		<!-- 底部 -->
+		<view class="live-bottom fixed-bottom">
+			<view class="px-2">
+				<view class="live-send px-3" @click="handleOpenInput">
+					<text class="send-hint text-white font">说点什么...</text>
+				</view>
+			</view>
+			<view class="live-send-gift">
+				<view @click="handleOpenCoin">
+					<text class="iconfont btn text-white" style="font-size: 44px;margin-right: 12rpx;">&#xe6ee;</text>
+				</view>
+				<view class="icon-btn bg-warning" @click="handleClickOpenGift">
+					<text class="iconfont btn text-white">&#xe67c;</text>
+				</view>
+				<view class="icon-btn">
+					<text class="iconfont btn text-white">&#xe615;</text>
+				</view>
+				<view class="icon-btn" @click="handleBack">
+					<text class="iconfont btn text-white">&#xeaf2;</text>
+				</view>
+			</view>
+		</view>
+		<!-- 输入框弹出组件 -->
+		<uni-popup type="bottom" ref="inputRef">
+			<view class="bg-white flex align-center px-3" style="height: 120rpx;">
+				<input type="text" v-model="content" class="border rounded flex-1 px-3 font-md" placeholder="说点什么..."
+					style="height: 80rpx;" />
+				<view class="flex align-center justify-center py-2 px-2 ml-3 rounded" @click="submit"
+					:class="content === '' ? 'bg-main-disabled' : 'bg-main'">
+					<text class="font text-white">发送</text>
+				</view>
+			</view>
+		</uni-popup>
+		<!-- 送礼物弹出层 -->
+		<uni-popup type="bottom" ref="giftRef">
+			<view class="live-gift-content bg-white">
+				<view style="height: 100rpx;" class="flex justify-between align-center">
+					<text class="text-main font-md ml-3">礼物</text>
+					<view class="flex align-center justify-center" style="width: 100rpx; height100rpx;"
+						@click="handleCloseGiftPopup">
+						<text class="iconfont btn">&#xeaf2;</text>
+					</view>
+				</view>
+
+				<swiper style="height: 350rpx;" class="border-top border-bottom" :indicator-dots="true" :duration="500">
+					<swiper-item>
+						<view class="flex flex-wrap">
+							<view v-for="item in giftList" :key="item.id" @click="handleSelectGift(item)"
+								style="width:185rpx;height:175rpx;" class="flex flex-column justify-center align-center"
+								:class="giftActiveId === item.id ? 'border border-main' : ''">
+								<image :src="item.image" mode="aspectFit" style="width: 100rpx;height:100rpx;"></image>
+								<view class="flex mt-1">
+									<text class="text-warning font mr-1">{{item.name}}</text>
+									<text class="text-secondary font">{{item.coin}}</text>
+								</view>
+							</view>
+						</view>
+					</swiper-item>
+				</swiper>
+
+				<view style="height: 100rpx;" class="flex align-center justify-end">
+					<view class="flex align-center justify-center py-2 px-2 mr-3 rounded bg-warning">
+						<text class="font text-white">充值</text>
+					</view>
+					<view class="flex align-center justify-center py-2 px-2 mr-3 rounded bg-main"
+						@click="handleSendGift">
+						<text class="font text-white">发送</text>
+					</view>
+				</view>
+			</view>
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	import LiveGft from '@/components/live/live-gift.vue'
+	import LiveDanmu from '@/components/live/live-danmu.vue'
+	import UniPopup from '@/components/uni-ui/uni-popup/uni-popup.vue'
+	export default {
+		components: {
+			LiveGft,
+			LiveDanmu,
+			UniPopup,
+		},
+		data() {
+			return {
+				statusBarHeight: 0,
+				content: '',
+				giftActiveId: null,
+				giftList: [{
+					"image": "/static/gift/1.png",
+					"id": 1,
+					"name": "鸡蛋",
+					"coin": 1
+				}, {
+					"image": "/static/gift/2.png",
+					"id": 2,
+					"name": "666",
+					"coin": 2
+				}, {
+					"image": "/static/gift/3.png",
+					"id": 3,
+					"name": "雪糕",
+					"coin": 3
+				}, {
+					"image": "/static/gift/4.png",
+					"id": 4,
+					"name": "龙虾",
+					"coin": 4
+				}, {
+					"image": "/static/gift/5.png",
+					"id": 5,
+					"name": "精灵球",
+					"coin": 5
+				}, {
+					"image": "/static/gift/6.png",
+					"id": 6,
+					"name": "胶囊",
+					"coin": 6
+				}, {
+					"image": "/static/gift/7.png",
+					"id": 7,
+					"name": "爱心",
+					"coin": 7
+				}, {
+					"image": "/static/gift/8.png",
+					"id": 8,
+					"name": "花",
+					"coin": 8
+				}],
+			};
+		},
+		onLoad() {
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+		},
+		mounted() {
+			// setInterval(() => {
+			// 	this.$refs.liveGftRef.send({
+			// 		username: "发送人",
+			// 		avatar: "/static/gift/2.png",
+			// 		gift_name: "大蛋糕",
+			// 		gift_image: "/static/gift/5.png",
+			// 		num: 1,
+			// 	})
+			// }, 3000)
+		},
+		methods: {
+			handleBack() {
+				uni.navigateBack({
+					delta: 1,
+				})
+			},
+			handleOpenInput() {
+				this.$refs.inputRef.open()
+			},
+			handleClickSend() {
+				if (this.content === '') return
+				this.$refs.liveDanmuRef.send({
+					id: 1,
+					name: "昵称",
+					content: this.content
+				})
+				this.content = ''
+				this.$refs.inputRef.close()
+			},
+			handleClickOpenGift() {
+				this.$refs.giftRef.open()
+			},
+			handleCloseGiftPopup() {
+				this.$refs.giftRef.close()
+			},
+			handleSelectGift(item) {
+				this.giftActiveId = item.id
+			},
+			handleSendGift() {
+				if (!this.giftActiveId) return
+				const gift = this.giftList.find(item => item.id === this.giftActiveId)
+				if (gift) {
+					this.$refs.liveGftRef.send({
+						username: "发送人",
+						avatar: gift.image,
+						gift_name: gift.name,
+						gift_image: gift.image,
+						num: 1,
+					})
+				}
+			},
+			handleOpenCoin(){
+				console.log(121321)
+				uni.navigateTo({
+					url:'/pages/coin/coin'
+				})
+			}
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.live-page {
+		flex: 1;
+		display: flex;
+		padding-bottom: constant(safe-area-inset-bottom); // 兼容 IOS<11.2 
+		padding-bottom: env(safe-area-inset-bottom); // 兼容 IOS>11.2 
+	}
+
+	.live-top {
+		.info-avtar {
+			width: 75rpx;
+			height: 75rpx;
+		}
+
+		.info-btn {
+			min-width: 70rpx;
+			height: 70rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.live-top-info {
+			height: 80rpx;
+
+			.info-left {
+				width: 350rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+
+			.info-right {
+				width: 325rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+			}
+		}
+
+		.live-top-jold {
+			height: 80rpx;
+
+			.info-left {
+				width: 350rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+		}
+
+		.live-top-gift {}
+	}
+
+
+
+	.live-bottom {
+		height: 120rpx;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+
+		.live-send {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 80rpx;
+			border-radius: 100rpx;
+			background-color: rgba(255, 255, 255, 0.12);
+
+			.send-hint {}
+		}
+
+		.live-send-gift {
+			flex-direction: row;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			.icon-btn {
+				width: 80rpx;
+				height: 80rpx;
+				border-radius: 100rpx;
+				margin-right: 12rpx;
+				background-color: rgba(255, 255, 255, 0.12);
+				padding: 10rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				.btn {
+					font-size: 25px;
+				}
+			}
+
+			.bg-warning {
+				background-color: #ffc107;
+			}
+		}
+
+		.live-gift-content {
+			width: 100%;
+			height: 550rpx;
+		}
+
+	}
+</style>

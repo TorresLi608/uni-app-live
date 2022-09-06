@@ -9,7 +9,7 @@
 			</swiper-item>
 		</swiper>
 		<view class="flex flex-wrap">
-			<view class="live-item" v-for="item in 10" :key="item">
+			<view class="live-item" v-for="item in 10" :key="item" @click="handleOpenLive">
 				<image src="/static/image/1.jpg" mode="" class="live-image rounded" mode="aspectFill"></image>
 				<view class="live-item-top-left rounded-circle px-2 py-1 flex align-center font-sm text-white">
 					<text class="iconfont icon-jinbi icon-size text-warning mr-1"></text>0
@@ -32,6 +32,13 @@
 		data() {
 			return {
 				title: "title"
+			}
+		},
+		methods:{
+			handleOpenLive(){
+				uni.navigateTo({
+					url:'/pages/live/live'
+				})
 			}
 		}
 	}

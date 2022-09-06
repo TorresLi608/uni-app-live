@@ -7,19 +7,49 @@
 					"titleNView": {
 						"titleText": "直播",
 						"titleAlign": "left",
-						"buttons": [
-							{
-								"type": "menu"
-							}
-						]
+						"buttons": [{
+							"type": "menu"
+						}]
 					}
 				}
 			}
 		},
 		{
 			"path": "pages/my/my"
+		},
+		{
+			"path": "pages/live/live",
+			"style": {
+				"app-plus": {
+					"titleNView": false
+				},
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false
+			}
+
 		}
-	],
+	    ,{
+            "path" : "pages/coin/coin",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的余额",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/create-live/create-live",
+            "style" :                                                                                    
+            {
+				"app-plus": {
+					"titleNView": false
+				}
+            }
+            
+        }
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app-live",

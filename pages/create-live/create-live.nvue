@@ -1,0 +1,162 @@
+<template>
+	<view>
+		<live-pusher id='livePusher' ref="livePusher" class="livePusher" :url="url" :mode="mode"
+			:enable-camera="enableCamera" :auto-focus="true" :device-position="position" :beauty="beauty"
+			:whiteness="whiteness" aspect="9:16" @statechange="statechange" @netstatus="netstatus" @error="error"
+			:style="'height: '+windowHeight+'px;'" style="width: 750rpx;"></live-pusher>
+	</view>
+</template>
+
+<script>
+	import uniPopup from '@/components/uni-ui/uni-popup/uni-popup.vue';
+	export default {
+		components: {
+			uniPopup
+		},
+		data() {
+			return {
+				url: "",
+				mode: "SD",
+				enableCamera: true,
+				position: "back",
+				beauty: 0,
+				whiteness: 0,
+				windowHeight: 0,
+				context: null,
+				statusBarHeight: 0,
+
+				modeList: [{
+					type: "SD",
+					desc: "标清"
+				}, {
+					type: "HD",
+					desc: "高清"
+				}, {
+					type: "FHD",
+					desc: "超清"
+				}],
+
+				popupType: "mode",
+
+				showBars: true,
+
+				form: {
+					title: "",
+					cover: ""
+				}
+			}
+		},
+		onLoad() {
+			let res = uni.getSystemInfoSync()
+			this.windowHeight = res.windowHeight
+			this.statusBarHeight = res.statusBarHeight
+		},
+		computed: {
+			popupTitle() {
+				let o = {
+					mode: "画质",
+					beauty: "美颜",
+					whiteness: "美白",
+				}
+				return o[this.popupType]
+			}
+		},
+		onReady() {
+			this.context = uni.createLivePusherContext('livePusher', this)
+			this.startPreview()
+		},
+		onBackPress() {
+			this.showBars = false
+		},
+		methods: {
+			chooseCover() {
+				uni.chooseImage({
+					count: 1,
+					success: (res) => {
+						$H.upload('/upload', {
+							filePath: res.tempFilePaths[0]
+						}, (p) => {
+							console.log(p);
+						}).then(res => {
+							this.form.cover = $C.imageUrl + res.url
+						})
+					}
+				})
+			},
+			back() {
+				uni.navigateBack({
+					delta: 1
+				});
+			},
+			// 画质选择
+			chooseMode(item) {
+				this.mode = item.type
+				uni.showToast({
+					title: '画质切换为' + item.desc,
+					icon: 'none'
+				});
+				this.$refs.popup.close()
+			},
+			openPopup(type) {
+				this.popupType = type
+				this.$refs.popup.open()
+			},
+			closePopup() {
+				this.$refs.popup.close()
+			},
+			// 切换摄像头
+			switchCamera() {
+				this.context.switchCamera({
+					success: (e) => {
+						this.position = this.position === 'back' ? 'front' : 'back'
+					}
+				})
+			},
+			// 开启预览
+			startPreview() {
+				this.context.startPreview({
+					success: (e) => {
+						console.log(e);
+					},
+					fail: (e) => {
+						console.log(e,'eee');
+					}
+				})
+			},
+			// 直播状态变化
+			statechange(e) {
+				// console.log(e);
+			},
+			// 直播网络变化
+			netstatus(e) {
+				// console.log(e);
+			},
+			error(e) {
+				console.log(e, 'error');
+			},
+			handleSliderChange(e) {
+				this[this.popupType] = e.detail.value
+			},
+			openLiveRoom() {
+				$H.post('/live/create', this.form, {
+					token: true
+				}).then(res => {
+					let options = {
+						mode: this.mode,
+						position: this.position,
+						beauty: this.beauty,
+						whiteness: this.whiteness
+					}
+					uni.navigateTo({
+						url: `../liveroom/liveroom?options=${JSON.stringify(options)}&data=${encodeURIComponent(JSON.stringify(res))}`,
+					});
+				})
+
+			}
+		}
+	}
+</script>
+
+<style>
+
+</style>

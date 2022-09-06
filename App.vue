@@ -6,10 +6,14 @@
 			const domModule = weex.requireModule('dom')
 			domModule.addRule('fontFace', {
 				'fontFamily': "iconfont",
-				'src': "url('~@/static/icon/iconfnt.ttf')"
+				 'src': "url(\'http://at.alicdn.com/t/c/font_3588540_wy19ahyya6q.ttf?t=1662447814790\')"
+				// 'src': 'url("'+"file:/" + plus.io.convertLocalFileSystemURL("_www/static/icon/iconfont.ttf")+'")'
 			});
 			// 监听底部中间按钮点击
 			uni.onTabBarMidButtonTap(()=>{
+				uni.navigateTo({
+					url:"/pages/create-live/create-live",
+				})
 				console.log('111')
 			})
 		},
@@ -27,6 +31,6 @@
 	@import url("/common/free.css");
 	@import url("/common/common.css");
 	/* #ifndef APP-PLUS-NVUE */
-	@import url("static/icon/iconfont.css");
+	@import url("/static/icon/iconfont.css");
 	/* #endif */
 </style>
