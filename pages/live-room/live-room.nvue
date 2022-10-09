@@ -1,0 +1,345 @@
+<template>
+	<view class="live-page">
+		<!-- http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8 -->
+		<!-- http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4 -->
+		<live-pusher id='livePusher' ref="livePusher" class="livePusher" :url="url" :mode="mode"
+			:enable-camera="enableCamera" :auto-focus="true" :device-position="position" :beauty="beauty"
+			:whiteness="whiteness" aspect="9:16" @statechange="statechange" @netstatus="netstatus" @error="error"
+			:style="'height: '+windowHeight+'px;'" style="width: 750rpx;"></live-pusher>
+		<!-- 顶部 -->
+		<view class="live-top fixed-top" :style="{top:statusBarHeight+'px'}">
+			<!-- 个人信息 -->
+			<view class="live-top-info px-2 flex justify-between align-center">
+				<view class="info-left rounded-circle">
+					<view class="p">
+						<image class="info-avtar rounded-circle" src="/static/gift/5.png"></image>
+					</view>
+					<view class="flex-1">
+						<text class="text-white font">昵称</text>
+						<text class="text-white font-sm">100</text>
+					</view>
+					<view class="info-btn rounded-circle bg-danger">
+						<text class="text-white">+</text>
+					</view>
+				</view>
+				<view class="info-right rounded-circle bg-info">
+					<scroll-view scroll-x="true" class="flex-1 flex">
+						<view class="p" v-for="item in 10" :key="item">
+							<image class="info-avtar rounded-circle" src="/static/gift/5.png"></image>
+						</view>
+					</scroll-view>
+					<view class="info-btn rounded-circle bg-danger">
+						<!-- <text class="text-white font">昵称</text> -->
+						<text class="text-white font-sm">10000</text>
+					</view>
+				</view>
+			</view>
+			<!-- 金币 -->
+			<view class="live-top-jold px-2 my-2">
+				<view class="info-left rounded-circle">
+					<view class="p">
+						<text class="text-warning">金币</text>
+					</view>
+					<view class="flex-1">
+						<text class="text-white font">110</text>
+					</view>
+				</view>
+			</view>
+			<!-- 礼物 -->
+			<view class="live-top-gift">
+				<live-gft ref="liveGftRef" />
+			</view>
+		</view>
+		<!-- 弹幕 -->
+		<LiveDanmu ref="liveDanmuRef" />
+		<!-- 底部 -->
+		<view class="live-bottom fixed-bottom">
+			<view v-for="btn in btns" :key="btn.name" class="flex-1 flex flex-column justify-center align-center" @click="handleBottomEvent(btn)" >
+				<text class="iconfont text-white" style="font-size: 55rpx;">{{btn.icon}}</text>
+				<text class="text-white font">{{btn.name}}</text>
+			</view>
+		</view>
+		<uni-popup type="bottom" ref="popupRef">
+			<view class="bg-white">
+				<view class="flex justify-center align-center border-bottom" style="height: 90rpx;">
+					<text class="font-md">{{popupTitle}}</text>
+				</view>
+				<!-- 画质选择 -->
+				<view v-if="popupType === 'mode'">
+					<view v-for="item in modeList" :key="item.type" class="flex align-center justify-center py-2" :class="{'bg-main':item.type === mode}" hover-class="bg-light" @click="chooseMode(item)">
+						<text class="font-md" :class="{'text-white':item.type === mode}">{{item.desc}}</text>
+					</view>
+				</view>
+				<!-- 美颜 -->
+				<view v-else-if="popupType === 'beauty'" class="">
+					<slider :min="0" :max="9" :step="1" :value="beauty" :block-size="18" show-value @change="handleSliderChange"/>
+				</view>
+				<!-- 美白 -->
+				<view v-else-if="popupType === 'whiteness'" class="">
+					<slider :min="0" :max="9" :step="1" :value="whiteness" :block-size="18" show-value @change="handleSliderChange"/>
+				</view>
+				<view  v-else class="flex flex-wrap">
+					<view v-for="item in moreBtns" class="flex flex-column justify-center align-center" style="width: 150rpx;height: 150rpx;"
+					@click="handleBottomEvent(item)">
+							<text class="iconfont" style="font-size: 55rpx;">{{item.icon}}</text>
+							<text class="font">{{item.name}}</text>
+					</view>
+				</view>
+				<view class="f-divider"></view>
+				<view class="flex justify-center align-center" style="height: 90rpx;" hover-class="bg-light" @click="closePopup">
+					<text class="font-md">取消</text>
+				</view>
+			</view>
+		</uni-popup>
+	</view>
+</template>
+
+<script>
+	import LiveGft from '@/components/live/live-gift.vue'
+	import LiveDanmu from '@/components/live/live-danmu.vue'
+	import UniPopup from '@/components/uni-ui/uni-popup/uni-popup.vue'
+	export default {
+		components: {
+			LiveGft,
+			LiveDanmu,
+			UniPopup,
+		},
+		data() {
+			return {
+				url: "",
+				enableCamera: true,
+				mode: "SD",
+				position: "back",
+				beauty: 0,
+				whiteness: 0,
+				context: null,
+				windowHeight: 0,
+				statusBarHeight: 0,
+				content: '',
+				popupType: "mode",
+				modeList: [{
+					type: "SD",
+					desc: "标清"
+				}, {
+					type: "HD",
+					desc: "高清"
+				}, {
+					type: "FHD",
+					desc: "超清"
+				}],
+				btns:[
+					{
+						name:"翻转",
+						icon:"\ue672",
+						event:"switchCamera",
+						params:'',
+					},
+					{
+						name:"画质",
+						icon:"\ue60c",
+						event:"openPopup",
+						params:'mode',
+					},
+					{
+						name:"美颜",
+						icon:"\ue632",
+						event:"openPopup",
+						params:'beauty',
+					},
+					{
+						name:"美白",
+						icon:"\ue631",
+						event:"openPopup",
+						params:'whiteness',
+					},
+					{
+						name:"更多",
+						icon:"\ue600",
+						event:"openPopup",
+						params:'more',
+					}
+				],
+				moreBtns:[
+					{
+						name:"暂停",
+						icon:"\ue667",
+						event:"more",
+					},
+					{
+						name:"退出",
+						icon:"\ue792",
+						event:"handleExit",
+					},
+				]
+			};
+		},
+		onLoad() {
+			this.statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+		},
+		onReady() {
+			this.context = uni.createLivePusherContext('livePusher', this)
+			this.startPreview()
+		},
+		computed: {
+			popupTitle() {
+				let o = {
+					mode: "画质",
+					beauty: "美颜",
+					whiteness: "美白",
+					more:"更多"
+				}
+				return o[this.popupType]
+			}
+		},
+		mounted() {
+			// setInterval(() => {
+			// 	this.$refs.liveGftRef.send({
+			// 		username: "发送人",
+			// 		avatar: "/static/gift/2.png",
+			// 		gift_name: "大蛋糕",
+			// 		gift_image: "/static/gift/5.png",
+			// 		num: 1,
+			// 	})
+			// }, 3000)
+		},
+		methods: {
+			handleExit(){
+				uni.showModal({
+					content: '是否要结束当前直播',
+					cancelText:"取消",
+					confirmText:"确定",
+					success: (res)=> {
+						if (res.confirm) {
+							uni.navigateBack({delta:1})
+						}
+					}
+				});	
+			},
+			handleBack() {
+				uni.navigateBack({
+					delta: 1,
+				})
+			},
+			handleBottomEvent(item){
+				this[item.event](item.params)
+			},
+			// 画质选择
+			chooseMode(item) {
+				this.mode = item.type
+				uni.showToast({
+					title: '画质切换为' + item.desc,
+					icon: 'none'
+				});
+				this.$refs.popupRef.close()
+			},
+			openPopup(type) {
+				this.popupType = type
+				this.$refs.popupRef.open()
+			},
+			closePopup() {
+				this.$refs.popupRef.close()
+			},
+			// 切换摄像头
+			switchCamera() {
+				this.context.switchCamera({
+					success: (e) => {
+						this.position = this.position === 'back' ? 'front' : 'back'
+					}
+				})
+			},
+			// 开启预览
+			startPreview() {
+				console.log(this.context.startPreview, 'this.contextthis.context')
+				this.context.startPreview({
+					success: (e) => {
+						console.log(e);
+					},
+					fail: (e) => {
+						console.log(e, 'eee');
+					}
+				})
+			},
+			// 直播状态变化
+			statechange(e) {
+				// console.log(e);
+			},
+			// 直播网络变化
+			netstatus(e) {
+				// console.log(e);
+			},
+			error(e) {
+				console.log(e, 'error');
+			},
+		}
+	}
+</script>
+
+<style lang="scss" scoped>
+	.live-page {
+		flex: 1;
+		display: flex;
+	}
+
+	.live-top {
+		.info-avtar {
+			width: 75rpx;
+			height: 75rpx;
+		}
+
+		.info-btn {
+			width: 70rpx;
+			height: 70rpx;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.live-top-info {
+			height: 80rpx;
+
+			.info-left {
+				width: 350rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+
+			.info-right {
+				width: 325rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+			}
+		}
+
+		.live-top-jold {
+			height: 80rpx;
+
+			.info-left {
+				width: 350rpx;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+		}
+
+		.live-top-gift {}
+	}
+
+
+
+	.live-bottom {
+		height: 120rpx;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		padding-bottom: 10rpx;
+
+	}
+</style>

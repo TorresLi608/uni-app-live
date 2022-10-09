@@ -15,7 +15,18 @@
 			}
 		},
 		{
-			"path": "pages/my/my"
+			"path": "pages/my/my",
+			"style": {
+				"app-plus": {
+					"titleNView": {
+						"titleText": "我的",
+						"titleAlign": "left",
+						"buttons": [{
+							"type": "menu"
+						}]
+					}
+				}
+			}
 		},
 		{
 			"path": "pages/live/live",
@@ -43,9 +54,21 @@
             "path" : "pages/create-live/create-live",
             "style" :                                                                                    
             {
+				"backgroundColor": "#000000",
 				"app-plus": {
 					"titleNView": false
 				}
+            }
+            
+        }
+        ,{
+            "path" : "pages/live-room/live-room",
+            "style": {
+            	"app-plus": {
+            		"titleNView": false
+            	},
+            	"navigationBarTitleText": "",
+            	"enablePullDownRefresh": false
             }
             
         }

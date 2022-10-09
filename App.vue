@@ -6,15 +6,15 @@
 			const domModule = weex.requireModule('dom')
 			domModule.addRule('fontFace', {
 				'fontFamily': "iconfont",
-				 'src': "url(\'http://at.alicdn.com/t/c/font_3588540_wy19ahyya6q.ttf?t=1662447814790\')"
+				'src': "url(\'http://at.alicdn.com/t/c/font_3588540_wy19ahyya6q.ttf?t=1662447814790\')"
 				// 'src': 'url("'+"file:/" + plus.io.convertLocalFileSystemURL("_www/static/icon/iconfont.ttf")+'")'
 			});
+			const sysTemInfo = uni.getSystemInfoSync()
 			// 监听底部中间按钮点击
-			uni.onTabBarMidButtonTap(()=>{
+			uni.onTabBarMidButtonTap(() => {
 				uni.navigateTo({
-					url:"/pages/create-live/create-live",
+					url: "/pages/create-live/create-live",
 				})
-				console.log('111')
 			})
 		},
 		onShow: function() {

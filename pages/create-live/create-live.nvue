@@ -4,6 +4,73 @@
 			:enable-camera="enableCamera" :auto-focus="true" :device-position="position" :beauty="beauty"
 			:whiteness="whiteness" aspect="9:16" @statechange="statechange" @netstatus="netstatus" @error="error"
 			:style="'height: '+windowHeight+'px;'" style="width: 750rpx;"></live-pusher>
+		<view v-if="showBars">
+		<view style="position: fixed;left: 0;right: 0;" :style="`top:${statusBarHeight}px;`">
+			<!-- 退出符号 -->
+			<view class="flex align-center justify-center" style="width: 90rpx;height: 90rpx;" @click="back">
+				<text class="iconfont btn text-white">&#xeaf2;</text>
+			</view>
+			<!-- 中间 -->
+			<view class="position-absolute rounded p-2 flex" style="left: 90rpx;right: 100rpx;height: 160rpx;background: rgba(0, 0, 0, 0.1);">
+				<view class="position-relative rounded overflow-hidden" style="height: 120rpx; width: 130rpx;">
+						<image src="/static/gift/4.png" mode="" style="height: 120rpx; width: 120rpx;"></image>
+						<text class="text-white position-absolute font" style="left: 0;right: 0; bottom: 0;">更换图片</text>
+				</view>
+				<view class="flex-1 ml-2 flex flex-column justify-between">
+					<input type="text" value="" placeholder="请输入直播标题">
+					<text class="text-white font">#请选择分类</text>
+				</view>
+			</view>
+			<!-- 右边icon -->
+			<view class="position-absolute right-0" style="width: 100rpx;">
+				<view class="flex flex-column align-center justify-center mb-1" style="height: 120rpx;width: 100rpx;" @click="switchCamera">
+					<text class="iconfont text-white" style="font-size: 55rpx;">&#xe672;</text>
+					<text class="text-white font">翻转</text>
+				</view>
+				<view class="flex flex-column align-center justify-center mb-1" style="height: 120rpx;width: 100rpx;" @click="openPopup('mode')">
+					<text class="iconfont text-white" style="font-size: 55rpx;">&#xe60c;</text>
+					<text class="text-white font">画质</text>
+				</view>
+				<view class="flex flex-column align-center justify-center mb-1" style="height: 120rpx;width: 100rpx;" @click="openPopup('beauty')">
+					<text class="iconfont text-white" style="font-size: 55rpx;">&#xe632;</text>
+					<text class="text-white font">美颜</text>
+				</view>
+				<view class="flex flex-column align-center justify-center mb-1" style="height: 120rpx;width: 100rpx;" @click="openPopup('whiteness')">
+					<text class="iconfont text-white" style="font-size: 55rpx;">&#xe631;</text>
+					<text class="text-white font">美白</text>
+				</view>
+			</view>
+		</view>
+		<view class="position-fixed bg-main flex align-center justify-center rounded-circle" 
+			style="left: 100rpx; right: 100rpx; bottom: 100rpx;height: 120rpx;" @click="openLiveRoom">
+			<text class="text-white font-md">开始视频直播</text>
+		</view>
+		</view>
+		<uni-popup type="bottom" ref="popupRef">
+			<view class="bg-white">
+				<view class="flex justify-center align-center border-bottom" style="height: 90rpx;">
+					<text class="font-md">{{popupTitle}}</text>
+				</view>
+				<!-- 画质选择 -->
+				<view v-if="popupType === 'mode'">
+					<view v-for="item in modeList" :key="item.type" class="flex align-center justify-center py-2" :class="{'bg-main':item.type === mode}" hover-class="bg-light" @click="chooseMode(item)">
+						<text class="font-md" :class="{'text-white':item.type === mode}">{{item.desc}}</text>
+					</view>
+				</view>
+				<!-- 美颜 -->
+				<view v-else-if="popupType === 'beauty'" class="">
+					<slider :min="0" :max="9" :step="1" :value="beauty" :block-size="18" show-value @change="handleSliderChange"/>
+				</view>
+				<!-- 美白 -->
+				<view v-else class="">
+					<slider :min="0" :max="9" :step="1" :value="whiteness" :block-size="18" show-value @change="handleSliderChange"/>
+				</view>
+				<view class="f-divider"></view>
+				<view class="flex justify-center align-center" style="height: 90rpx;" hover-class="bg-light" @click="closePopup">
+					<text class="font-md">取消</text>
+				</view>
+			</view>
+		</uni-popup>
 	</view>
 </template>
 
@@ -16,8 +83,8 @@
 		data() {
 			return {
 				url: "",
-				mode: "SD",
 				enableCamera: true,
+				mode: "SD",
 				position: "back",
 				beauty: 0,
 				whiteness: 0,
@@ -49,7 +116,9 @@
 		onLoad() {
 			let res = uni.getSystemInfoSync()
 			this.windowHeight = res.windowHeight
+			// 状态栏的高
 			this.statusBarHeight = res.statusBarHeight
+			console.log(12312312)
 		},
 		computed: {
 			popupTitle() {
@@ -95,14 +164,14 @@
 					title: '画质切换为' + item.desc,
 					icon: 'none'
 				});
-				this.$refs.popup.close()
+				this.$refs.popupRef.close()
 			},
 			openPopup(type) {
 				this.popupType = type
-				this.$refs.popup.open()
+				this.$refs.popupRef.open()
 			},
 			closePopup() {
-				this.$refs.popup.close()
+				this.$refs.popupRef.close()
 			},
 			// 切换摄像头
 			switchCamera() {
@@ -114,12 +183,13 @@
 			},
 			// 开启预览
 			startPreview() {
+				console.log(this.context.startPreview, 'this.contextthis.context')
 				this.context.startPreview({
 					success: (e) => {
 						console.log(e);
 					},
 					fail: (e) => {
-						console.log(e,'eee');
+						console.log(e, 'eee');
 					}
 				})
 			},
@@ -138,6 +208,15 @@
 				this[this.popupType] = e.detail.value
 			},
 			openLiveRoom() {
+				uni.navigateTo({
+					url:`../live-room/live-room?options=${JSON.stringify({
+						mode:this.mode,
+						position: this.position,
+						beauty: this.beauty,
+						whiteness: this.whiteness,
+					})}`
+				})
+				return
 				$H.post('/live/create', this.form, {
 					token: true
 				}).then(res => {
